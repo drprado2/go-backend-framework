@@ -1,0 +1,9 @@
+{
+  "DatabaseHost": "localhost",
+  "DatabasePort": 5432,
+  "DatabaseUser": "postgres",
+  "DatabasePassword": "admin123",
+  "DatabaseName": "test-db",
+  "HttpServerPort": "9000",
+  "MigrationsPath": "pkg/storage/postgres-db/migrations"
+}
