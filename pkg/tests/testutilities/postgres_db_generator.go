@@ -12,36 +12,33 @@ const (
 	emptyString = ""
 )
 
-func CreateRandomDB() (string, string, string, error) {
+func CreateRandomDB() (*sql.DB, *sql.DB, string, error) {
 	dbName, err := uuid.NewUUID()
 	if err != nil {
-		return emptyString, emptyString, emptyString, err
+		return nil, nil, emptyString, err
 	}
 
 	config, err := configs.GetConfig()
+	connStringWithoutDB := fmt.Sprintf("host=%s port=%d user=%s password=%s sslmode=disable",
+		config.DatabaseHost, config.DatabasePort, config.DatabaseUser, config.DatabasePassword)
+
+	connectionWithoutDB, err := sql.Open("postgres", connStringWithoutDB)
 	if err != nil {
-		return emptyString, emptyString, emptyString, err
+		return nil, nil, emptyString, err
 	}
 
-	connInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s sslmode=disable",
-		config.DatabaseHost, config.DatabasePort, config.DatabaseUser, config.DatabasePassword)
-	conn, err := sql.Open("postgres", connInfo)
-	defer conn.Close()
-	if err != nil {
-		return emptyString, emptyString, emptyString, err
+	sqlCreateDB := `CREATE DATABASE "` + dbName.String() + `";`
+	if _, err := connectionWithoutDB.Exec(sqlCreateDB); err != nil {
+		return nil, nil, emptyString, err
 	}
-	err = conn.Ping()
-	if err != nil {
-		return emptyString, emptyString, emptyString, err
-	}
-	sql := `CREATE DATABASE "` + dbName.String() + `";`
-	if _, err := conn.Exec(sql); err != nil {
-		return emptyString, emptyString, emptyString, err
-	}
-	connectionWithDb := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=disable",
+
+	connStringWithDB := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		config.DatabaseHost, config.DatabasePort, config.DatabaseUser, config.DatabasePassword, dbName.String())
 
-	return dbName.String(), connectionWithDb, connInfo, nil
+	connectionWithDB, err := sql.Open("postgres", connStringWithDB)
+	if err != nil {
+		return nil, nil, emptyString, err
+	}
+
+	return connectionWithoutDB, connectionWithDB, dbName.String(), nil
 }

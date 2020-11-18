@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/drprado2/go-backend-framework/pkg/storage"
+	_ "github.com/lib/pq"
 )
 
 const (
@@ -14,52 +15,46 @@ type DatabaseFactory struct {
 	connectionString string
 }
 
-type Transaction struct {
-	sql.Tx
-}
-
 type Connection struct {
 	sql.Conn
 }
 
-func (conn *Connection) BeginTx(ctx context.Context, opts *sql.TxOptions) (*storage.TransactionInterface, error){
+func (conn *Connection) BeginTx(ctx context.Context, opts *sql.TxOptions) (storage.TransactionInterface, error) {
 	tx, err := conn.Conn.BeginTx(ctx, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	var transaction storage.TransactionInterface = &Transaction{Tx: *tx}
+	var transaction storage.TransactionInterface = tx
 
-	return &transaction, nil
+	return transaction, nil
 }
 
 type Database struct {
 	sql.DB
 }
 
-func (db *Database) Begin() (*storage.TransactionInterface, error){
+func (db *Database) Begin() (storage.TransactionInterface, error) {
 	tx, err := db.DB.Begin()
 	if err != nil {
 		return nil, err
 	}
 
-	var transaction storage.TransactionInterface = &Transaction{Tx: *tx}
-
-	return &transaction, nil
+	return tx, nil
 }
 
-func (db *Database) BeginTx(ctx context.Context, opts *sql.TxOptions) (*storage.TransactionInterface, error){
+func (db *Database) BeginTx(ctx context.Context, opts *sql.TxOptions) (storage.TransactionInterface, error) {
 	tx, err := db.DB.BeginTx(ctx, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	var transaction storage.TransactionInterface = &Transaction{Tx: *tx}
+	var transaction storage.TransactionInterface = tx
 
-	return &transaction, nil
+	return transaction, nil
 }
 
-func (db *Database) Conn(ctx context.Context) (*storage.ConnectionInterface, error){
+func (db *Database) Conn(ctx context.Context) (storage.ConnectionInterface, error) {
 	conn, err := db.DB.Conn(ctx)
 	if err != nil {
 		return nil, err
@@ -67,7 +62,7 @@ func (db *Database) Conn(ctx context.Context) (*storage.ConnectionInterface, err
 
 	var connection storage.ConnectionInterface = &Connection{Conn: *conn}
 
-	return &connection, nil
+	return connection, nil
 }
 
 func NewDatabaseFactory(connString string) *DatabaseFactory {

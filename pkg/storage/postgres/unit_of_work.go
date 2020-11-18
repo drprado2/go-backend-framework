@@ -1,6 +1,9 @@
 package postgres
 
-import "github.com/drprado2/go-backend-framework/pkg/storage"
+import (
+	"github.com/drprado2/go-backend-framework/pkg/storage"
+	_ "github.com/lib/pq"
+)
 
 type UnitOfWork struct {
 	DB storage.FullDatabaseInterface
@@ -13,21 +16,21 @@ func NewUnitOfWork(db storage.FullDatabaseInterface) *UnitOfWork {
 	}
 }
 
-func (uow *UnitOfWork) BeginTran() error{
+func (uow *UnitOfWork) BeginTran() error {
 	tx, err := uow.DB.Begin()
-	uow.tx = *tx
+	uow.tx = tx
 	return err
 }
 
-func (uow *UnitOfWork) Rollback() error{
-	 return uow.tx.Rollback()
+func (uow *UnitOfWork) Rollback() error {
+	return uow.tx.Rollback()
 }
 
-func (uow *UnitOfWork) Commit() error{
+func (uow *UnitOfWork) Commit() error {
 	return uow.tx.Commit()
 }
 
-func (uow *UnitOfWork) GetDatabase() *storage.DatabaseInterface{
+func (uow *UnitOfWork) GetDatabase() *storage.DatabaseInterface {
 	var db storage.DatabaseInterface = uow.tx
 	return &db
 }

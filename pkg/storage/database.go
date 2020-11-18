@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type DatabaseFactoryInterface interface{
+type DatabaseFactoryInterface interface {
 	GetDB() (*FullDatabaseInterface, error)
 }
 
@@ -16,21 +16,21 @@ type DatabaseInterface interface {
 	Prepare(query string) (*sql.Stmt, error)
 	Query(query string, args ...interface{}) (*sql.Rows, error)
 	QueryRow(query string, args ...interface{}) *sql.Row
+	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
+	QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row
+	PrepareContext(ctx context.Context, query string) (*sql.Stmt, error)
+	QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
 }
 
 type FullDatabaseInterface interface {
 	DatabaseInterface
-	Begin() (*TransactionInterface, error)
-	BeginTx(ctx context.Context, opts *sql.TxOptions) (*TransactionInterface, error)
+	Begin() (TransactionInterface, error)
+	BeginTx(ctx context.Context, opts *sql.TxOptions) (TransactionInterface, error)
 	Close() error
-	Conn(ctx context.Context) (*ConnectionInterface, error)
+	Conn(ctx context.Context) (ConnectionInterface, error)
 	Driver() driver.Driver
-	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
 	Ping() error
 	PingContext(ctx context.Context) error
-	PrepareContext(ctx context.Context, query string) (*sql.Stmt, error)
-	QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
-	QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row
 	SetConnMaxIdleTime(d time.Duration)
 	SetConnMaxLifetime(d time.Duration)
 	SetMaxIdleConns(n int)
@@ -38,7 +38,7 @@ type FullDatabaseInterface interface {
 	Stats() sql.DBStats
 }
 
-type TransactionInterface interface{
+type TransactionInterface interface {
 	Commit() error
 	Exec(query string, args ...interface{}) (sql.Result, error)
 	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
@@ -53,8 +53,8 @@ type TransactionInterface interface{
 	StmtContext(ctx context.Context, stmt *sql.Stmt) *sql.Stmt
 }
 
-type ConnectionInterface interface{
-	BeginTx(ctx context.Context, opts *sql.TxOptions) (*TransactionInterface, error)
+type ConnectionInterface interface {
+	BeginTx(ctx context.Context, opts *sql.TxOptions) (TransactionInterface, error)
 	Close() error
 	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
 	PingContext(ctx context.Context) error
