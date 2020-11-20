@@ -10,7 +10,7 @@ type UnitOfWork struct {
 	tx storage.TransactionInterface
 }
 
-func NewUnitOfWork(db storage.FullDatabaseInterface) *UnitOfWork {
+func NewUnitOfWork(db storage.FullDatabaseInterface) storage.UnitOfWorkInterface {
 	return &UnitOfWork{
 		DB: db,
 	}
@@ -23,14 +23,20 @@ func (uow *UnitOfWork) BeginTran() error {
 }
 
 func (uow *UnitOfWork) Rollback() error {
-	return uow.tx.Rollback()
+	err := uow.tx.Rollback()
+	uow.tx = nil
+	return err
 }
 
 func (uow *UnitOfWork) Commit() error {
-	return uow.tx.Commit()
+	err := uow.tx.Commit()
+	uow.tx = nil
+	return err
 }
 
-func (uow *UnitOfWork) GetDatabase() *storage.DatabaseInterface {
-	var db storage.DatabaseInterface = uow.tx
-	return &db
+func (uow *UnitOfWork) GetDatabase() storage.DatabaseInterface {
+	if uow.tx != nil {
+		return uow.tx
+	}
+	return uow.DB
 }
