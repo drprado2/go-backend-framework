@@ -81,6 +81,14 @@ func (g *Graph) AddVertice(vertices ...Vertice) error {
 	return nil
 }
 
+func (g *Graph) UpdateVerticeData(verticeId uuid.UUID, data interface{}) error {
+	vertice, ok := g.vertices[verticeId.String()]
+	if !ok {
+		return fmt.Errorf("Vertice not found")
+	}
+	vertice.GenericData = data
+	return nil
+}
 
 func (g *Graph) ContainsVertice(verticeId uuid.UUID) bool {
 	_, contains := g.vertices[verticeId.String()]

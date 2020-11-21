@@ -235,3 +235,37 @@ func TestGraph_AddVertice(t *testing.T) {
 		t.Errorf("The generic data is invalid")
 	}
 }
+
+func TestGraph_UpdateVerticeData(t *testing.T) {
+	fixture := GraphTestFixture{}
+	fixture.setup()
+
+	verticeDataType := struct {
+		name string
+		age  int
+	}{
+		"Teste",
+		25,
+	}
+
+	vertice := NewVertice(nil)
+	fixture.directedAcycleGraph.AddVertice(*vertice)
+
+	fixture.directedAcycleGraph.UpdateVerticeData(vertice.ID, verticeDataType)
+
+	vertices := fixture.directedAcycleGraph.GetVertices()
+	addedVertice := vertices[0]
+
+	if addedVertice.ID != vertice.ID {
+		t.Errorf("The vertice ID added is invalid, value: %s", addedVertice.ID.String())
+	}
+
+	genericData := addedVertice.GenericData.(struct {
+		name string
+		age  int
+	})
+
+	if genericData.age != verticeDataType.age || genericData.name != verticeDataType.name {
+		t.Errorf("The generic data is invalid")
+	}
+}
