@@ -22,7 +22,7 @@ func TestGraph_AddEmptyEdge(t *testing.T) {
 	fixture.setup()
 	defer fixture.teardown()
 
-	err := fixture.directedAcycleGraph.AddEdge(uuid.New(), uuid.New(), nil)
+	err := fixture.directedAcycleGraph.AddEdge(uuid.New(), uuid.New(), 0, nil)
 	if err == nil || err.Error() != "The vertice From and vertice To must be added to the directedAcycleGraph before creating the edge" {
 		t.Errorf("Error must be not null got: %s", err)
 	}
@@ -36,7 +36,7 @@ func TestGraph_AddEdgeWithHead(t *testing.T) {
 	headVertice := NewVertice(nil)
 	fixture.directedAcycleGraph.AddVertice(*headVertice)
 
-	err := fixture.directedAcycleGraph.AddEdge(uuid.New(), headVertice.ID, nil)
+	err := fixture.directedAcycleGraph.AddEdge(uuid.New(), headVertice.ID, 0, nil)
 	if err == nil || err.Error() != "The vertice From and vertice To must be added to the directedAcycleGraph before creating the edge" {
 		t.Errorf("Error must be not null got: %s", err)
 	}
@@ -51,7 +51,7 @@ func TestGraph_AddEdgeWithTail(t *testing.T) {
 
 	fixture.directedAcycleGraph.AddVertice(*tailVertice)
 
-	err := fixture.directedAcycleGraph.AddEdge(tailVertice.ID, uuid.New(), nil)
+	err := fixture.directedAcycleGraph.AddEdge(tailVertice.ID, uuid.New(), 0, nil)
 	if err == nil || err.Error() != "The vertice From and vertice To must be added to the directedAcycleGraph before creating the edge" {
 		t.Errorf("Error must be not null got: %s", err)
 	}
@@ -66,7 +66,7 @@ func TestGraph_AddEdgeWithHeadTail(t *testing.T) {
 	headVertice := NewVertice(nil)
 	fixture.directedAcycleGraph.AddVertice(*tailVertice, *headVertice)
 
-	fixture.directedAcycleGraph.AddEdge(tailVertice.ID, headVertice.ID, nil)
+	fixture.directedAcycleGraph.AddEdge(tailVertice.ID, headVertice.ID, 0, nil)
 
 	edges := fixture.directedAcycleGraph.GetEdges()
 	vertices := fixture.directedAcycleGraph.GetVertices()
@@ -76,7 +76,7 @@ func TestGraph_AddEdgeWithHeadTail(t *testing.T) {
 	}
 	for _, vertice := range vertices {
 		if (vertice.ID != tailVertice.ID && vertice.ID != headVertice.ID) || vertice.GenericData != nil {
-			t.Errorf("The vertices added are invalid")
+			t.Errorf("The vertexes added are invalid")
 		}
 	}
 
@@ -98,7 +98,7 @@ func TestGraph_UpdateEdgeData(t *testing.T) {
 	headVertice := NewVertice(nil)
 	fixture.directedAcycleGraph.AddVertice(*tailVertice, *headVertice)
 
-	fixture.directedAcycleGraph.AddEdge(tailVertice.ID, headVertice.ID, nil)
+	fixture.directedAcycleGraph.AddEdge(tailVertice.ID, headVertice.ID, 0, nil)
 
 	edges := fixture.directedAcycleGraph.GetEdges()
 	vertices := fixture.directedAcycleGraph.GetVertices()
@@ -137,7 +137,7 @@ func TestGraph_Encapsulation(t *testing.T) {
 	headVertice := NewVertice(nil)
 	fixture.directedAcycleGraph.AddVertice(*tailVertice, *headVertice)
 
-	fixture.directedAcycleGraph.AddEdge(tailVertice.ID, headVertice.ID, nil)
+	fixture.directedAcycleGraph.AddEdge(tailVertice.ID, headVertice.ID, 0, nil)
 
 	tailVertice.GenericData = 30
 	headVertice.GenericData = 50
@@ -184,7 +184,7 @@ func TestGraph_AddEdgeWithGenericData(t *testing.T) {
 	headVertice := NewVertice(nil)
 	fixture.directedAcycleGraph.AddVertice(*tailVertice, *headVertice)
 
-	fixture.directedAcycleGraph.AddEdge(tailVertice.ID, headVertice.ID, edgeDataType)
+	fixture.directedAcycleGraph.AddEdge(tailVertice.ID, headVertice.ID, 0, edgeDataType)
 
 	edges := fixture.directedAcycleGraph.GetEdges()
 
