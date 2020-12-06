@@ -22,7 +22,7 @@ func TestGraph_AddEmptyEdge(t *testing.T) {
 	fixture.setup()
 	defer fixture.teardown()
 
-	err := fixture.directedAcycleGraph.AddEdge(uuid.New(), uuid.New(), 0, nil)
+	err := fixture.directedAcycleGraph.AddEdge(uuid.New().String(), uuid.New().String(), 0, nil)
 	if err == nil || err.Error() != "The vertice From and vertice To must be added to the directedAcycleGraph before creating the edge" {
 		t.Errorf("Error must be not null got: %s", err)
 	}
@@ -36,7 +36,7 @@ func TestGraph_AddEdgeWithHead(t *testing.T) {
 	headVertice := NewVertice(nil)
 	fixture.directedAcycleGraph.AddVertice(*headVertice)
 
-	err := fixture.directedAcycleGraph.AddEdge(uuid.New(), headVertice.ID, 0, nil)
+	err := fixture.directedAcycleGraph.AddEdge(uuid.New().String(), headVertice.ID, 0, nil)
 	if err == nil || err.Error() != "The vertice From and vertice To must be added to the directedAcycleGraph before creating the edge" {
 		t.Errorf("Error must be not null got: %s", err)
 	}
@@ -51,7 +51,7 @@ func TestGraph_AddEdgeWithTail(t *testing.T) {
 
 	fixture.directedAcycleGraph.AddVertice(*tailVertice)
 
-	err := fixture.directedAcycleGraph.AddEdge(tailVertice.ID, uuid.New(), 0, nil)
+	err := fixture.directedAcycleGraph.AddEdge(tailVertice.ID, uuid.New().String(), 0, nil)
 	if err == nil || err.Error() != "The vertice From and vertice To must be added to the directedAcycleGraph before creating the edge" {
 		t.Errorf("Error must be not null got: %s", err)
 	}
@@ -223,7 +223,7 @@ func TestGraph_AddVertice(t *testing.T) {
 	addedVertice := vertices[0]
 
 	if addedVertice.ID != vertice.ID {
-		t.Errorf("The vertice ID added is invalid, value: %s", addedVertice.ID.String())
+		t.Errorf("The vertice ID added is invalid, value: %s", addedVertice.ID)
 	}
 
 	genericData := addedVertice.GenericData.(struct {
@@ -257,7 +257,7 @@ func TestGraph_UpdateVerticeData(t *testing.T) {
 	addedVertice := vertices[0]
 
 	if addedVertice.ID != vertice.ID {
-		t.Errorf("The vertice ID added is invalid, value: %s", addedVertice.ID.String())
+		t.Errorf("The vertice ID added is invalid, value: %s", addedVertice.ID)
 	}
 
 	genericData := addedVertice.GenericData.(struct {

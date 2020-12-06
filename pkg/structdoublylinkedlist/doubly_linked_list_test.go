@@ -44,8 +44,7 @@ func TestList_Add(t *testing.T) {
 		id:   2,
 		name: "Bruno",
 	}
-	list.Add(elemA)
-	list.Add(elemB)
+	list.Add(elemA, elemB)
 
 	headId := list.head.data.(testElement).id
 	if headId != elemA.id {
@@ -78,10 +77,7 @@ func TestList_AddOrdered(t *testing.T) {
 		id:   4,
 		name: "Bruno",
 	}
-	list.Add(elemC)
-	list.Add(elemB)
-	list.Add(elemD)
-	list.Add(elemA)
+	list.Add(elemC, elemB, elemD, elemA)
 
 	if list.lenght != 4 {
 		t.Errorf("List lenght must be 2 got %v", list.lenght)
@@ -251,5 +247,26 @@ func TestList_Unshift(t *testing.T) {
 	}
 	if list.lenght != 0 {
 		t.Errorf("List lenght shoud be 0 got %v", list.lenght)
+	}
+}
+
+func TestList_Exists(t *testing.T) {
+	list := NewList(testElementEquals, reflect.TypeOf(testElement{}))
+
+	elemA := testElement{
+		id:   1,
+		name: "Adriano",
+	}
+	elemB := testElement{
+		id:   2,
+		name: "Pedro",
+	}
+	list.Add(elemA)
+
+	if !list.Exists(elemA) {
+		t.Error("Element A must exists")
+	}
+	if list.Exists(elemB) {
+		t.Error("Element B must not exists")
 	}
 }

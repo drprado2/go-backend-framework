@@ -123,19 +123,21 @@ func (l *List) addHead(element interface{}) {
 	l.head = node
 }
 
-func (l *List) Add(element interface{}) error {
-	if err := l.checkElementType(element); err != nil {
-		return err
-	}
+func (l *List) Add(elements ...interface{}) error {
+	for _, element := range elements {
+		if err := l.checkElementType(element); err != nil {
+			return err
+		}
 
-	l.lenght++
+		l.lenght++
 
-	if l.head == nil {
-		l.addHead(element)
-	} else if l.isOrdered {
-		l.addOrdered(element)
-	} else {
-		l.addLast(element)
+		if l.head == nil {
+			l.addHead(element)
+		} else if l.isOrdered {
+			l.addOrdered(element)
+		} else {
+			l.addLast(element)
+		}
 	}
 
 	return nil
@@ -152,6 +154,17 @@ func (l *List) removeNode(node *Node) {
 	node.next.prev = node.prev
 }
 
+func (l *List) Exists(element interface{}) bool {
+	for current := l.head; ; current = current.next {
+		if l.equalityComparator(current.data, element) {
+			return true
+		}
+		if current.next == l.head {
+			return false
+		}
+	}
+}
+
 func (l *List) Remove(element interface{}) bool {
 	for current := l.head; ; current = current.next {
 		if l.equalityComparator(current.data, element) {
@@ -159,10 +172,9 @@ func (l *List) Remove(element interface{}) bool {
 			return true
 		}
 		if current.next == l.head {
-			break
+			return false
 		}
 	}
-	return false
 }
 
 func (l *List) Unshift() interface{} {
@@ -204,4 +216,8 @@ func (l *List) ToIterator() *ListIterator {
 		currentNode: nil,
 		list:        l,
 	}
+}
+
+func (l *List) Lenght() int {
+	return l.lenght
 }

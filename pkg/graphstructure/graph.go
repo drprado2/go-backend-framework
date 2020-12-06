@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/drprado2/go-backend-framework/pkg/queuestructure"
 	"github.com/drprado2/go-backend-framework/pkg/stackstructure"
+	"github.com/drprado2/go-backend-framework/pkg/structdoublylinkedlist"
 	"github.com/google/uuid"
+	"reflect"
 )
 
 type PathPoint struct {
@@ -14,14 +16,14 @@ type PathPoint struct {
 
 type Vertex struct {
 	GenericData           interface{}
-	ID                    uuid.UUID
+	ID                    string
 	edgesAdjacentVertices []*Edge
 }
 
 func NewVertice(data interface{}) *Vertex {
 	return &Vertex{
 		GenericData:           data,
-		ID:                    uuid.New(),
+		ID:                    uuid.New().String(),
 		edgesAdjacentVertices: make([]*Edge, 0, 10),
 	}
 }
@@ -69,9 +71,9 @@ func NewUndirectedGraph() *Graph {
 
 func (g *Graph) addVertice(vertice Vertex) error {
 	if g.ContainsVertice(vertice.ID) {
-		return fmt.Errorf("Vertex %s already exists, use UpdateVerticeData to change the vertice data", vertice.ID.String())
+		return fmt.Errorf("Vertex %s already exists, use UpdateVerticeData to change the vertice data", vertice.ID)
 	}
-	g.vertexes[vertice.ID.String()] = &vertice
+	g.vertexes[vertice.ID] = &vertice
 	return nil
 }
 
@@ -89,8 +91,8 @@ func (g *Graph) AddVertice(vertices ...Vertex) error {
 	return nil
 }
 
-func (g *Graph) UpdateVerticeData(verticeId uuid.UUID, data interface{}) error {
-	vertice, ok := g.vertexes[verticeId.String()]
+func (g *Graph) UpdateVerticeData(verticeId string, data interface{}) error {
+	vertice, ok := g.vertexes[verticeId]
 	if !ok {
 		return fmt.Errorf("Vertex not found")
 	}
@@ -98,22 +100,22 @@ func (g *Graph) UpdateVerticeData(verticeId uuid.UUID, data interface{}) error {
 	return nil
 }
 
-func (g *Graph) ContainsVertice(verticeId uuid.UUID) bool {
-	_, contains := g.vertexes[verticeId.String()]
+func (g *Graph) ContainsVertice(verticeId string) bool {
+	_, contains := g.vertexes[verticeId]
 	return contains
 }
 
-func (g *Graph) AddEdge(fromVerticeId uuid.UUID, toVerticeId uuid.UUID, weight int, extraData interface{}) error {
+func (g *Graph) AddEdge(fromVerticeId string, toVerticeId string, weight int, extraData interface{}) error {
 	if !g.ContainsVertice(fromVerticeId) || !g.ContainsVertice(toVerticeId) {
 		return fmt.Errorf("The vertice From and vertice To must be added to the directedAcycleGraph before creating the edge")
 	}
 
-	verticeFrom := g.vertexes[fromVerticeId.String()]
-	verticeTo := g.vertexes[toVerticeId.String()]
+	verticeFrom := g.vertexes[fromVerticeId]
+	verticeTo := g.vertexes[toVerticeId]
 
 	for _, currentEdge := range verticeFrom.edgesAdjacentVertices {
 		if currentEdge.Head.ID == verticeTo.ID {
-			return fmt.Errorf("Already exists one edge between %s and %s, use UpdateEdgeData to change the edge data", fromVerticeId.String(), toVerticeId.String())
+			return fmt.Errorf("Already exists one edge between %s and %s, use UpdateEdgeData to change the edge data", fromVerticeId, toVerticeId)
 		}
 	}
 
@@ -143,13 +145,13 @@ func (g *Graph) AddEdge(fromVerticeId uuid.UUID, toVerticeId uuid.UUID, weight i
 	return nil
 }
 
-func (g *Graph) UpdateEdgeData(fromVerticeId uuid.UUID, toVerticeId uuid.UUID, extraData interface{}) error {
+func (g *Graph) UpdateEdgeData(fromVerticeId string, toVerticeId string, extraData interface{}) error {
 	if !g.ContainsVertice(fromVerticeId) || !g.ContainsVertice(toVerticeId) {
 		return fmt.Errorf("The vertice From and vertice To must be added to the directedAcycleGraph before creating the edge")
 	}
 
-	verticeFrom := g.vertexes[fromVerticeId.String()]
-	verticeTo := g.vertexes[toVerticeId.String()]
+	verticeFrom := g.vertexes[fromVerticeId]
+	verticeTo := g.vertexes[toVerticeId]
 
 	for _, currentEdge := range verticeFrom.edgesAdjacentVertices {
 		if currentEdge.Head.ID == verticeTo.ID {
@@ -170,9 +172,9 @@ func (g *Graph) UpdateEdgeData(fromVerticeId uuid.UUID, toVerticeId uuid.UUID, e
 	return nil
 }
 
-func (g *Graph) RemoveVertice(verticeId uuid.UUID) error {
+func (g *Graph) RemoveVertice(verticeId string) error {
 	if !g.ContainsVertice(verticeId) {
-		fmt.Errorf("The vertice %s not exists in the directedAcycleGraph", verticeId.String())
+		fmt.Errorf("The vertice %s not exists in the directedAcycleGraph", verticeId)
 	}
 
 	for _, vertice := range g.vertexes {
@@ -183,13 +185,13 @@ func (g *Graph) RemoveVertice(verticeId uuid.UUID) error {
 		}
 	}
 
-	delete(g.vertexes, verticeId.String())
+	delete(g.vertexes, verticeId)
 	return nil
 }
 
-func (g *Graph) RemoveEdge(fromVerticeId uuid.UUID, toVerticeId uuid.UUID) error {
-	from, containsFrom := g.vertexes[fromVerticeId.String()]
-	to, containsTo := g.vertexes[toVerticeId.String()]
+func (g *Graph) RemoveEdge(fromVerticeId string, toVerticeId string) error {
+	from, containsFrom := g.vertexes[fromVerticeId]
+	to, containsTo := g.vertexes[toVerticeId]
 
 	if !containsFrom || !containsTo {
 		return fmt.Errorf("The verticeFrom or verticeTo doesn`t exist")
@@ -236,7 +238,7 @@ func (g *Graph) ExistsCycle() bool {
 		return true
 	}
 
-	alreadyVisited := make([]uuid.UUID, 0, len(g.vertexes))
+	alreadyVisited := make([]string, 0, len(g.vertexes))
 	visitedControl := stackstructure.NewStack(3)
 
 	for _, vertex := range g.vertexes {
@@ -247,10 +249,10 @@ func (g *Graph) ExistsCycle() bool {
 	return false
 }
 
-func (g *Graph) existsCycle(vertex *Vertex, alreadyVisiteds []uuid.UUID, visitedInCurrentScan *stackstructure.Stack) bool {
+func (g *Graph) existsCycle(vertex *Vertex, alreadyVisiteds []string, visitedInCurrentScan *stackstructure.Stack) bool {
 	if visitedInCurrentScan.PositionOfElement(vertex.ID, func(elemA interface{}, elemB interface{}) bool {
-		idA := elemA.(uuid.UUID)
-		idB := elemB.(uuid.UUID)
+		idA := elemA.(string)
+		idB := elemB.(string)
 		return idA == idB
 	}) > -1 {
 		return true
@@ -274,10 +276,10 @@ func (g *Graph) existsCycle(vertex *Vertex, alreadyVisiteds []uuid.UUID, visited
 	return false
 }
 
-func (g *Graph) GetCycles() [][]uuid.UUID {
-	alreadyVisited := make([]uuid.UUID, 0, len(g.vertexes))
+func (g *Graph) GetCycles() [][]string {
+	alreadyVisited := make([]string, 0, len(g.vertexes))
 	visitedControl := stackstructure.NewStack(3)
-	result := make([][]uuid.UUID, 0)
+	result := make([][]string, 0)
 
 	for _, vertex := range g.vertexes {
 		g.getCycles(vertex, alreadyVisited, visitedControl, result)
@@ -286,16 +288,16 @@ func (g *Graph) GetCycles() [][]uuid.UUID {
 	return result
 }
 
-func (g *Graph) getCycles(vertex *Vertex, alreadyVisited []uuid.UUID, visitedInCurrentScan *stackstructure.Stack, result [][]uuid.UUID) {
+func (g *Graph) getCycles(vertex *Vertex, alreadyVisited []string, visitedInCurrentScan *stackstructure.Stack, result [][]string) {
 	if visitedInCurrentScan.PositionOfElement(vertex.ID, func(elemA interface{}, elemB interface{}) bool {
-		idA := elemA.(uuid.UUID)
-		idB := elemB.(uuid.UUID)
+		idA := elemA.(string)
+		idB := elemB.(string)
 		return idA == idB
 	}) > -1 {
 		cycle := visitedInCurrentScan.CopyToSlice()
-		cycleIds := make([]uuid.UUID, 0, len(cycle)+1)
+		cycleIds := make([]string, 0, len(cycle)+1)
 		for i, id := range cycle {
-			cycleIds[i] = id.(uuid.UUID)
+			cycleIds[i] = id.(string)
 		}
 		cycleIds[len(cycle)+1] = vertex.ID
 		result = append(result, cycleIds)
@@ -316,15 +318,15 @@ func (g *Graph) getCycles(vertex *Vertex, alreadyVisited []uuid.UUID, visitedInC
 	visitedInCurrentScan.Unstack()
 }
 
-func (g *Graph) BreadthFirstSearch(fromVertexId uuid.UUID, toVertexId uuid.UUID) (*Vertex, error) {
-	vertexFrom, findFrom := g.vertexes[fromVertexId.String()]
-	_, findTo := g.vertexes[toVertexId.String()]
+func (g *Graph) BreadthFirstSearch(fromVertexId string, toVertexId string) (*Vertex, error) {
+	vertexFrom, findFrom := g.vertexes[fromVertexId]
+	_, findTo := g.vertexes[toVertexId]
 
 	if !findFrom || !findTo {
 		return nil, fmt.Errorf("VertexFrom or vertexTo doen`s exist in the graph")
 	}
 
-	alreadyVisitedIds := make([]uuid.UUID, 0, len(g.vertexes))
+	alreadyVisitedIds := make([]string, 0, len(g.vertexes))
 	vertexResult := g.breadthFirstSearch(vertexFrom, toVertexId, alreadyVisitedIds)
 	if vertexResult == nil {
 		return nil, nil
@@ -335,7 +337,7 @@ func (g *Graph) BreadthFirstSearch(fromVertexId uuid.UUID, toVertexId uuid.UUID)
 	return &result, nil
 }
 
-func (g *Graph) breadthFirstSearch(vertexFrom *Vertex, toVertexId uuid.UUID, alreadyVisitedIds []uuid.UUID) *Vertex {
+func (g *Graph) breadthFirstSearch(vertexFrom *Vertex, toVertexId string, alreadyVisitedIds []string) *Vertex {
 	for _, el := range alreadyVisitedIds {
 		if vertexFrom.ID == el {
 			return nil
@@ -359,15 +361,15 @@ func (g *Graph) breadthFirstSearch(vertexFrom *Vertex, toVertexId uuid.UUID, alr
 	return nil
 }
 
-func (g *Graph) DepthFirstSearch(fromVertexId uuid.UUID, toVertexId uuid.UUID) (*Vertex, error) {
-	vertexFrom, findFrom := g.vertexes[fromVertexId.String()]
-	_, findTo := g.vertexes[toVertexId.String()]
+func (g *Graph) DepthFirstSearch(fromVertexId string, toVertexId string) (*Vertex, error) {
+	vertexFrom, findFrom := g.vertexes[fromVertexId]
+	_, findTo := g.vertexes[toVertexId]
 
 	if !findFrom || !findTo {
 		return nil, fmt.Errorf("VertexFrom or vertexTo doen`s exist in the graph")
 	}
 
-	alreadyVisitedIds := make([]uuid.UUID, 0, len(g.vertexes))
+	alreadyVisitedIds := make([]string, 0, len(g.vertexes))
 	vertexFound := g.depthFirstSearch(vertexFrom, toVertexId, alreadyVisitedIds)
 
 	if vertexFound == nil {
@@ -379,7 +381,7 @@ func (g *Graph) DepthFirstSearch(fromVertexId uuid.UUID, toVertexId uuid.UUID) (
 	return &result, nil
 }
 
-func (g *Graph) depthFirstSearch(vertexFrom *Vertex, vertexToId uuid.UUID, alreadyVisitedIds []uuid.UUID) *Vertex {
+func (g *Graph) depthFirstSearch(vertexFrom *Vertex, vertexToId string, alreadyVisitedIds []string) *Vertex {
 	for _, el := range alreadyVisitedIds {
 		if vertexFrom.ID == el {
 			return nil
@@ -398,38 +400,132 @@ func (g *Graph) depthFirstSearch(vertexFrom *Vertex, vertexToId uuid.UUID, alrea
 	return nil
 }
 
-// TODO implementar
-func (g *Graph) GetRelatedVertices(fromVertices []uuid.UUID) ([]Vertex, error) {
-	return make([][]uuid.UUID, 0), nil
+func getVertexesList() *structdoublylinkedlist.List {
+	equalityFunc := func(elemA interface{}, elemB interface{}) bool {
+		vertexA, okA := elemA.(*Vertex)
+		vertexB, okB := elemB.(*Vertex)
+
+		if !okA || !okB {
+			return false
+		}
+
+		return vertexA.ID == vertexB.ID
+	}
+	return structdoublylinkedlist.NewList(equalityFunc, reflect.TypeOf(&Vertex{}))
 }
 
-func (g *Graph) FindShortestPath(fromVerticeId uuid.UUID, toVerticeId uuid.UUID) ([]PathPoint, error) {
-	verticeFrom, foundFrom := g.vertexes[fromVerticeId.String()]
-	_, foundTo := g.vertexes[toVerticeId.String()]
+func (g *Graph) GetDependents(fromVertices []string) ([]Vertex, error) {
+	vertexes := make([]*Vertex, 0, len(fromVertices))
+	for i, id := range fromVertices {
+		v, ok := g.vertexes[id]
+		if !ok {
+			return nil, fmt.Errorf("The vertex %v doens`t exist in the graph", id)
+		}
+		vertexes[i] = v
+	}
+
+	edges := g.GetEdges()
+	resultList := getVertexesList()
+	for _, vertex := range vertexes {
+		g.getDependents(vertex, edges, resultList)
+	}
+	result := make([]Vertex, 0, resultList.Lenght())
+	for elem := resultList.Unshift(); elem != nil; elem = resultList.Unshift() {
+		vertex := elem.(*Vertex)
+		result = append(result, *vertex)
+	}
+	return result, nil
+}
+
+func (g *Graph) getDependents(vertex *Vertex, edges []Edge, dependents *structdoublylinkedlist.List) {
+	if dependents.Exists(vertex) {
+		dependents.Remove(vertex)
+		dependents.Add(vertex)
+		return
+	}
+	dependents.Add(vertex)
+
+	for _, edge := range edges {
+		if edge.Head.ID == vertex.ID {
+			g.getDependents(edge.Tail, edges, dependents)
+		}
+	}
+}
+
+func (g *Graph) FindShortestPath(fromVerticeId string, toVerticeId string) ([]PathPoint, error) {
+	verticeFrom, foundFrom := g.vertexes[fromVerticeId]
+	_, foundTo := g.vertexes[toVerticeId]
 
 	if !foundFrom || !foundTo {
 		return nil, fmt.Errorf("VerticeFrom or verticeTo doesn`t exist in the graph")
 	}
 
-	sealedVertexes := make([]uuid.UUID, 0, 3)
-	pathPoints := make([]PathPoint, 0, 3)
-	pathPoints[0] = PathPoint{
+	sealedVertexes := make(map[string]PathPoint)
+	pathPoints := make(map[string]PathPoint)
+	pathPoints[verticeFrom.ID] = PathPoint{
 		Vertex:       *verticeFrom,
 		WeightUpHere: 0,
 	}
-
+	if finalPath := g.findShortestPath(pathPoints[verticeFrom.ID], toVerticeId, pathPoints, sealedVertexes); finalPath == nil {
+		return nil, fmt.Errorf("There is no way from %s to %s", fromVerticeId, toVerticeId)
+	}
+	result := make([]PathPoint, 0, 10)
+	for path := sealedVertexes[toVerticeId]; path.Vertex.ID != fromVerticeId; path = sealedVertexes[path.Vertex.ID] {
+		result = append(result, path)
+	}
+	result = append(result, sealedVertexes[fromVerticeId])
+	for x, z := 0, len(result)-1; x < z; x, z = x+1, z-1 {
+		result[x], result[z] = result[z], result[x]
+	}
+	return result, nil
 }
 
-func (g *Graph) findShortestPath(vertex *Vertex, toVerticeId uuid.UUID, sealedVertexes []uuid.UUID) ([]PathPoint, error) {
-	for _, sealed := range sealedVertexes{
-		if vertex.ID == sealed{
+func getPathPointSortedList() *structdoublylinkedlist.List {
+	equalityFunc := func(elemA interface{}, elemB interface{}) bool {
+		pathA, okA := elemA.(PathPoint)
+		pathB, okB := elemB.(PathPoint)
+
+		if !okA || !okB {
+			return false
+		}
+
+		return pathA.Vertex.ID == pathB.Vertex.ID
+	}
+	sortFunc := func(elemA interface{}, elemB interface{}) int {
+		pathA := elemA.(PathPoint)
+		pathB := elemB.(PathPoint)
+
+		return pathA.WeightUpHere - pathB.WeightUpHere
+	}
+	return structdoublylinkedlist.NewSortedList(equalityFunc, sortFunc, reflect.TypeOf(PathPoint{}))
+}
+
+func (g *Graph) findShortestPath(currentPath PathPoint, toVerticeId string, paths map[string]PathPoint, sealedVertexes map[string]PathPoint) *PathPoint {
+	sealedVertexes[currentPath.Vertex.ID] = currentPath
+
+	pathList := getPathPointSortedList()
+	for _, edge := range currentPath.Vertex.edgesAdjacentVertices {
+		if _, sealed := sealedVertexes[edge.Head.ID]; sealed {
 			continue
 		}
+		distance := currentPath.WeightUpHere + edge.Weight
+		if estimate, ok := paths[edge.Head.ID]; !ok || distance < estimate.WeightUpHere {
+			paths[edge.Head.ID] = PathPoint{
+				Vertex:       currentPath.Vertex,
+				WeightUpHere: distance,
+			}
+		}
+		if edge.Head.ID == toVerticeId {
+			path := paths[edge.Head.ID]
+			return &path
+		}
+		pathList.Add(paths[edge.Head.ID])
 	}
-	for _, edge := range vertex.edgesAdjacentVertices {
-
-		if edge.Head.
-
+	for path := pathList.Unshift(); path != nil; path = pathList.Unshift() {
+		cPath := path.(PathPoint)
+		if finalPath := g.findShortestPath(cPath, toVerticeId, paths, sealedVertexes); finalPath != nil {
+			return finalPath
+		}
 	}
-
+	return nil
 }
