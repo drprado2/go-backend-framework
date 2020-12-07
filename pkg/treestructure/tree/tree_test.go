@@ -4,78 +4,78 @@ import "testing"
 
 func getTestTree() *Tree {
 	root := &Node{
-		Id: 1,
+		ID: 1,
 	}
 	node2 := &Node{
-		Id: 2,
+		ID: 2,
 	}
 	node3 := &Node{
-		Id: 3,
+		ID: 3,
 	}
 	node4 := &Node{
-		Id: 4,
+		ID: 4,
 	}
 	node5 := &Node{
-		Id: 5,
+		ID: 5,
 	}
 	node6 := &Node{
-		Id: 6,
+		ID: 6,
 	}
 	node7 := &Node{
-		Id: 7,
+		ID: 7,
 	}
 	node8 := &Node{
-		Id: 8,
+		ID: 8,
 	}
 	node9 := &Node{
-		Id: 9,
+		ID: 9,
 	}
 	node10 := &Node{
-		Id: 10,
+		ID: 10,
 	}
 	node11 := &Node{
-		Id: 11,
+		ID: 11,
 	}
 	node12 := &Node{
-		Id: 12,
+		ID: 12,
 	}
 	node13 := &Node{
-		Id: 13,
+		ID: 13,
 	}
 	node14 := &Node{
-		Id: 14,
+		ID: 14,
 	}
 	node15 := &Node{
-		Id: 15,
+		ID: 15,
 	}
 	node16 := &Node{
-		Id: 16,
+		ID: 16,
 	}
 	node17 := &Node{
-		Id: 17,
+		ID: 17,
 	}
 	node18 := &Node{
-		Id: 18,
+		ID: 18,
 	}
 
 	tree, _ := NewTree(root)
-	tree.Add(root.Id, node2)
-	tree.Add(root.Id, node3)
-	tree.Add(root.Id, node4)
-	tree.Add(root.Id, node5)
-	tree.Add(node2.Id, node6)
-	tree.Add(node2.Id, node7)
-	tree.Add(node3.Id, node8)
-	tree.Add(node3.Id, node9)
-	tree.Add(node3.Id, node10)
-	tree.Add(node4.Id, node11)
-	tree.Add(node4.Id, node12)
-	tree.Add(node4.Id, node13)
-	tree.Add(node6.Id, node14)
-	tree.Add(node6.Id, node15)
-	tree.Add(node6.Id, node16)
-	tree.Add(node7.Id, node17)
-	tree.Add(node15.Id, node18)
+	tree.Add(root.ID, node2)
+	tree.Add(root.ID, node3)
+	tree.Add(root.ID, node4)
+	tree.Add(root.ID, node5)
+	tree.Add(node2.ID, node6)
+	tree.Add(node2.ID, node7)
+	tree.Add(node3.ID, node8)
+	tree.Add(node3.ID, node9)
+	tree.Add(node3.ID, node10)
+	tree.Add(node4.ID, node11)
+	tree.Add(node4.ID, node12)
+	tree.Add(node4.ID, node13)
+	tree.Add(node6.ID, node14)
+	tree.Add(node6.ID, node15)
+	tree.Add(node6.ID, node16)
+	tree.Add(node7.ID, node17)
+	tree.Add(node15.ID, node18)
 	return tree
 }
 
@@ -88,7 +88,7 @@ func TestTree_NewTreeWithNilRoot(t *testing.T) {
 
 func TestTree_NewTree(t *testing.T) {
 	root := &Node{
-		Id:           1,
+		ID:           1,
 		Data:         nil,
 		FirstChild:   nil,
 		FirstSibling: nil,
@@ -97,8 +97,8 @@ func TestTree_NewTree(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error must be null got %v", err)
 	}
-	if tree.Root.Id != root.Id {
-		t.Errorf("The root node id must be %v got %v", root.Id, tree.Root.Id)
+	if tree.Root.ID != root.ID {
+		t.Errorf("The root node id must be %v got %v", root.ID, tree.Root.ID)
 	}
 }
 

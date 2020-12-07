@@ -10,7 +10,7 @@ type Tree struct {
 }
 
 type Node struct {
-	Id           int
+	ID           int
 	Data         interface{}
 	FirstChild   *Node
 	FirstSibling *Node
@@ -44,7 +44,7 @@ func (t *Tree) Add(fatherId int, newNode *Node) bool {
 }
 
 func (t *Tree) Delete(nodeId int) (bool, error) {
-	if t.Root.Id == nodeId {
+	if t.Root.ID == nodeId {
 		return false, errors.New("can`t delete the root node")
 	}
 	node, fatherNode := t.FindNodeAndFather(nodeId)
@@ -53,13 +53,13 @@ func (t *Tree) Delete(nodeId int) (bool, error) {
 	}
 
 	var currentSibling *Node
-	if node.Id == fatherNode.FirstChild.Id {
+	if node.ID == fatherNode.FirstChild.ID {
 		fatherNode.FirstChild = node.FirstSibling
 		currentSibling = fatherNode.FirstChild
 	} else {
 		lastSibling := fatherNode.FirstChild
 		currentSibling = lastSibling.FirstSibling
-		for currentSibling.Id != node.Id {
+		for currentSibling.ID != node.ID {
 			lastSibling = currentSibling
 			currentSibling = currentSibling.FirstSibling
 		}
@@ -82,7 +82,7 @@ func findNodeAndFather(fatherNode *Node, currentNode *Node, idToFind int) (*Node
 	if currentNode == nil {
 		return nil, fatherNode
 	}
-	if currentNode.Id == idToFind {
+	if currentNode.ID == idToFind {
 		return currentNode, fatherNode
 	}
 	if node, father := findNodeAndFather(currentNode, currentNode.FirstChild, idToFind); node != nil {
@@ -101,7 +101,7 @@ func print(node *Node, currentPrint string) string {
 	if node == nil {
 		return currentPrint
 	}
-	result := fmt.Sprintf("%s%v(", currentPrint, node.Id)
+	result := fmt.Sprintf("%s%v(", currentPrint, node.ID)
 	result = print(node.FirstChild, result)
 	result = result + ")"
 	result = print(node.FirstSibling, result)
